@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        max-height: 100vh;
+        height: 100vh;
+        max-width: 100%;
+        overflow: hidden;
+        background: #1b2431;
+    }
+    
+    #svg-container {
+        cursor: grab;
+        overflow: auto;
+    }
+    
+    #svg-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover {
+        cursor: pointer;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover rect,
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover circle {
+        fill: #000 !important;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover circle {
+        stroke: #fff;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover g path {
+        fill: #fff;
+    }
+    /* LIBRE */
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free rect,
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free circle {
+        fill: #00a39c;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free circle {
+        stroke: #fff;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free g path {
+        fill: #fff;
+    }
+    /* OCUPADO */
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied rect,
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied circle {
+        fill: #af0000;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied circle {
+        stroke: #fff;
+    }
+    
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied g path {
+        fill: #fff;
+    }
+    /* BUTTONS */
+    
+    .buttons {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 100;
+        /* background: #000; */
+        display: flex;
+        justify-content: flex-end;
+        padding: 1em;
+    }
+    
+    .buttons button {
+        padding: 5px;
+        background: #313D4F;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    .buttons button svg {
+        fill: #fff;
+    }
+    
+    #tooltip {
+        width: 200px;
+        height: 200px;
+        background: #fff;
+        border-radius: 0px 5px 5px 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        visibility: hidden;
+        padding: 10px;
+    }
+    
+    #tooltip.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    g#ESTACIONAMIENTO_OCUPADO path,
+    g#AREAS_DE_OFICINAS path {
+        fill: #fff !important;
+    }
+</style>
+
+<body>
+    <div class="buttons">
+        <select id="levels"></select>
+        <button id="disminuir">
+            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M15.853 16.56c-1.683 1.517-3.911 2.44-6.353 2.44-5.243 0-9.5-4.257-9.5-9.5s4.257-9.5 9.5-9.5 9.5 4.257 9.5 9.5c0 2.442-.923 4.67-2.44 6.353l7.44 7.44-.707.707-7.44-7.44zm-6.353-15.56c4.691 0 8.5 3.809 8.5 8.5s-3.809 8.5-8.5 8.5-8.5-3.809-8.5-8.5 3.809-8.5 8.5-8.5zm-4.5 8h9v1h-9v-1z"/></svg>
+        </button>
+        <button id="aumentar">
+            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M15.853 16.56c-1.683 1.517-3.911 2.44-6.353 2.44-5.243 0-9.5-4.257-9.5-9.5s4.257-9.5 9.5-9.5 9.5 4.257 9.5 9.5c0 2.442-.923 4.67-2.44 6.353l7.44 7.44-.707.707-7.44-7.44zm-6.353-15.56c4.691 0 8.5 3.809 8.5 8.5s-3.809 8.5-8.5 8.5-8.5-3.809-8.5-8.5 3.809-8.5 8.5-8.5zm-4.5 8h4v-4h1v4h4v1h-4v4h-1v-4h-4v-1z"/></svg>
+        </button>
+    </div>
+    <div class="svg-container" style="height: 100vh;" id="svg-container"></div>
+    <div id="tooltip">
+        Breve info del estacionamiento aquí!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let zoom = 1;
+            let parkingLots = [];
+            const svgContainer = document.getElementById("svg-container");
+            let svg = {};
+            const tooltip = document.getElementById("tooltip");
+            const zommAdd = document.getElementById("aumentar");
+            const zoomMin = document.getElementById("disminuir");
+            const select = document.getElementById("levels");
+
+            const LISTSVGS = [{
+                name: "NIVEL 2",
+                uri: "nivel2.svg"
+            }, {
+                name: "NIVEL 2 COPIA",
+                uri: "nivel.svg"
+            }]
+
+            zommAdd.addEventListener("click", increase);
+            zoomMin.addEventListener("click", diminish);
+            select.addEventListener("change", handleLevelChange)
+
+            async function loadByURI(uri) {
+                document.getElementById("svg-container").innerHTML = "";
+                removeListeners();
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", uri, false);
+                xhr.overrideMimeType("image/svg+xml");
+                xhr.onload = function(e) {
+                    document.getElementById("svg-container").appendChild(xhr.responseXML.documentElement);
+                    parkingLots = document.querySelectorAll(`#svg-container .estacionamiento g[id^="PABELLÓN_"]`);
+                    svg = document.querySelector("#svg-container svg")
+                    loadListenersAndValues();
+                };
+                xhr.send("");
+            }
+
+            function loadListenersAndValues() {
+                parkingLots.forEach((e, idx) => {
+                    if (idx % 2 == 0) {
+                        e.classList.add("free");
+                        e.classList.remove("ocupied");
+                    } else {
+                        e.classList.add("ocupied");
+                        e.classList.remove("free");
+                    }
+
+                    e.addEventListener("click", () => handleParkingClick(e.id));
+                    e.addEventListener("mouseenter", (ev) => handleToolTipActivate(ev, e));
+                    e.addEventListener("mouseleave", removeTooltip);
+                })
+            }
+
+            function removeListeners() {
+                parkingLots.forEach((e, idx) => {
+                    e.removeEventListener("click", () => handleParkingClick(e.id));
+                    e.removeEventListener("mouseenter", (ev) => handleToolTipActivate(ev, e));
+                    e.removeEventListener("mouseleave", removeTooltip);
+                })
+            }
+
+            function renderLevelList() {
+                LISTSVGS.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.setAttribute("value", item.uri);
+                    opt.innerText = item.name;
+                    select.appendChild(opt)
+                })
+            }
+
+            function handleLevelChange(ev) {
+                loadByURI(ev.target.value)
+            }
+
+            function handleParkingClick(id) {
+                alert("clickeaste!! " + id)
+            }
+
+            function handleToolTipActivate(ev, el) {
+                tooltip.classList.add("active");
+                const rect = el.getBoundingClientRect();
+                mooveTooltip({
+                    x: rect.left + rect.width + 1,
+                    y: rect.top,
+                })
+            }
+
+            function mooveTooltip({
+                x,
+                y
+            }) {
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+            }
+
+            function removeTooltip() {
+                tooltip.classList.remove("active");
+            }
+
+            function increase() {
+                if (zoom >= 1.6) return;
+                zoom += 0.2;
+                svg.style.width = `${zoom*100}%`
+            }
+
+            function diminish() {
+                if (zoom == 1) return;
+                zoom -= 0.2;
+                svg.style.width = `${zoom*100}%`
+            }
+
+            // DRAG
+
+            let pos = {
+                top: 0,
+                left: 0,
+                x: 0,
+                y: 0
+            };
+
+            svgContainer.scrollTop = 0;
+            svgContainer.scrollLeft = 0;
+
+
+
+            const mouseDownHandler = function(e) {
+
+                svgContainer.style.cursor = 'grabbing';
+                svgContainer.style.userSelect = 'none';
+
+                pos = {
+                    // The current scroll 
+                    left: svgContainer.scrollLeft,
+                    top: svgContainer.scrollTop,
+                    // Get the current mouse position
+                    x: e.clientX,
+                    y: e.clientY,
+                };
+
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+
+            };
+
+            const mouseMoveHandler = function(e) {
+                // How far the mouse has been moved
+                const dx = e.clientX - pos.x;
+                const dy = e.clientY - pos.y;
+
+                // Scroll the element
+                svgContainer.scrollTop = pos.top - dy;
+                svgContainer.scrollLeft = pos.left - dx;
+            };
+
+            const mouseUpHandler = function() {
+                svgContainer.style.cursor = 'grab';
+                svgContainer.style.removeProperty('user-select');
+
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            };
+
+            renderLevelList();
+            loadByURI("nivel2.svg");
+            svgContainer.addEventListener('mousedown', mouseDownHandler);
+
+        })
+    </script>
+</body>
+
+</html>
