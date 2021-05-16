@@ -244,15 +244,39 @@
             }
 
             function increase() {
-                if (zoom >= 1.6) return;
-                zoom += 0.2;
+                let max = 2;
+                let range = 0.2;
+                const isMob = isMobile();
+                if (isMob) {
+                    max = 3.6;
+                    range = 0.5;
+                }
+                if (zoom >= max) return;
+                zoom += range;
                 svg.style.width = `${zoom*100}%`
             }
 
             function diminish() {
-                if (zoom == 1) return;
-                zoom -= 0.2;
+                let min = 1;
+                let range = 0.2;
+                const isMob = isMobile();
+                if (isMob) {
+                    range = 0.5;
+                }
+                if (zoom == min) return;
+                zoom -= range;
                 svg.style.width = `${zoom*100}%`
+            }
+
+            function isMobile() {
+                return (
+                    (navigator.userAgent.match(/Android/i)) ||
+                    (navigator.userAgent.match(/webOS/i)) ||
+                    (navigator.userAgent.match(/iPhone/i)) ||
+                    (navigator.userAgent.match(/iPod/i)) ||
+                    (navigator.userAgent.match(/iPad/i)) ||
+                    (navigator.userAgent.match(/BlackBerry/i))
+                );
             }
 
             // DRAG
