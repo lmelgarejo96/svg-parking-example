@@ -121,6 +121,10 @@
     g#AREAS_DE_OFICINAS path {
         fill: #fff !important;
     }
+    
+    #FONDO {
+        fill: #313D4F !important;
+    }
 </style>
 
 <body>
@@ -150,12 +154,12 @@
             const select = document.getElementById("levels");
 
             const LISTSVGS = [{
-                name: "NIVEL 2",
-                uri: "nivel2.svg"
+                name: "NIVEL 1",
+                uri: "svg/nivel1.svg"
             }, {
-                name: "NIVEL 2 COPIA",
-                uri: "nivel.svg"
-            }]
+                name: "NIVEL 2",
+                uri: "svg/nivel2.svg"
+            }, ]
 
             zommAdd.addEventListener("click", increase);
             zoomMin.addEventListener("click", diminish);
@@ -303,7 +307,7 @@
             };
 
             renderLevelList();
-            loadByURI("nivel2.svg");
+            loadByURI("svg/nivel1.svg");
             svgContainer.addEventListener('mousedown', mouseDownHandler);
 
         })
