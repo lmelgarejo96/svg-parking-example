@@ -30,49 +30,63 @@
     #svg-container::-webkit-scrollbar {
         display: none;
     }
+    /* ESTACIONAMIENTO_ */
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"]:hover {
         cursor: pointer;
     }
     
     #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover rect,
-    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover circle {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover circle,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"]:hover rect,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"]:hover circle {
         fill: #000 !important;
     }
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover circle {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover circle,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"]:hover circle {
         stroke: #fff;
     }
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover g path {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"]:hover g path,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"]:hover g path {
         fill: #fff;
     }
     /* LIBRE */
     
     #svg-container .estacionamiento g[id^="PABELLÓN_"].free rect,
-    #svg-container .estacionamiento g[id^="PABELLÓN_"].free circle {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free circle,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].free rect,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].free circle {
         fill: #00a39c;
     }
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"].free circle {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free circle,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].free circle {
         stroke: #fff;
     }
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"].free g path {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].free g path,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].free g path {
         fill: #fff;
     }
     /* OCUPADO */
     
     #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied rect,
-    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied circle {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied circle,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].ocupied rect,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].ocupied circle {
         fill: #af0000;
     }
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied circle {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied circle,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].ocupied circle {
         stroke: #fff;
     }
     
-    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied g path {
+    #svg-container .estacionamiento g[id^="PABELLÓN_"].ocupied g path,
+    #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"].ocupied g path {
         fill: #fff;
     }
     /* BUTTONS */
@@ -146,6 +160,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             let zoom = 1;
             let parkingLots = [];
+            const SELECTOR = `#svg-container .estacionamiento g[id^="PABELLÓN_"], #svg-container .estacionamiento g[id^="ESTACIONAMIENTO_"]`;
             const svgContainer = document.getElementById("svg-container");
             let svg = {};
             const tooltip = document.getElementById("tooltip");
@@ -159,7 +174,10 @@
             }, {
                 name: "NIVEL 2",
                 uri: "svgs/nivel2.svg"
-            }, ]
+            }, {
+                name: "Explanada",
+                uri: "svgs/explanada.svg"
+            }]
 
             zommAdd.addEventListener("click", increase);
             zoomMin.addEventListener("click", diminish);
@@ -173,7 +191,7 @@
                 xhr.overrideMimeType("image/svg+xml");
                 xhr.onload = function(e) {
                     document.getElementById("svg-container").appendChild(xhr.responseXML.documentElement);
-                    parkingLots = document.querySelectorAll(`#svg-container .estacionamiento g[id^="PABELLÓN_"]`);
+                    parkingLots = document.querySelectorAll(SELECTOR);
                     svg = document.querySelector("#svg-container svg")
                     loadListenersAndValues();
                     zoom = 1;
